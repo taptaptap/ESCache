@@ -32,7 +32,7 @@ It has two possible ways to persist cached data: file-backed persistence and NSU
 ```objective-c
 // cache's name is used as a key for NSUserDefaults' -setObject:forKey:
 // it would be used as a file name in case of file-backed persistence
-_cache = [[ESSecureCache alloc] initWithName:@"ESSecureCache" type:ESSecureCacheTypeUserDefaults]; 
+_cache = [[ESSecureCache alloc] initWithName:@"ESSecureCache" type:ESSecureCacheTypeUserDefaults error:NULL]; 
 ```
 
 ##### Cache an object (it doesn't differ from ESCache's method)
