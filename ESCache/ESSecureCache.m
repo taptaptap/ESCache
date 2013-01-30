@@ -256,6 +256,7 @@ static inline CCCryptorStatus AES128Run(CCOperation operation, NSData *inData, N
             break;
         case ESSecureCacheTypeUserDefaults:
             [[NSUserDefaults standardUserDefaults] setObject:cacheData forKey:self.name];
+            [[NSUserDefaults standardUserDefaults] synchronize];
             break;
     }
 }
