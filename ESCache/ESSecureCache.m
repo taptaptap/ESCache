@@ -281,7 +281,7 @@ static inline NSString *URLEncodeString(NSString *string) {
 #endif
 }
 
-static inline CCCryptorStatus AES128Run(CCOperation operation, NSData *inData, NSData *key, NSData *__autoreleasing *outData) {
+static __attribute__((always_inline)) CCCryptorStatus AES128Run(CCOperation operation, NSData *inData, NSData *key, NSData *__autoreleasing *outData) {
     CCCryptorStatus status = kCCParamError;
 
     if (outData != NULL) {
