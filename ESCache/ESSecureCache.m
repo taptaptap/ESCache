@@ -24,7 +24,6 @@
 #import "ESSecureCache.h"
 
 NSString * ESSecureCacheErrorDomain = @"ESSecureCache";
-static NSString * const kDefaultCacheName = @"f2e9-2863-3332-854c-f981-e7aa-e59c-12ef";
 static const char * kCacheQueueName = "info.idevblog.secure-cache";
 
 #pragma mark -
@@ -59,16 +58,6 @@ static inline CCCryptorStatus AES128Run(CCOperation operation, NSData *inData, N
 
     [super dealloc];
 #endif
-}
-
-+ (instancetype)sharedCache {
-    __strong static id sharedInstance = nil;
-
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        sharedInstance = [[self alloc] initWithName:kDefaultCacheName type:ESSecureCacheTypeFile error:NULL];
-    });
-    return sharedInstance;
 }
 
 - (void)setEncryptionKey:(NSData *)key {

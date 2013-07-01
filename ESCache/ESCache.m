@@ -23,7 +23,6 @@
 #import "ESCache.h"
 
 NSString * ESCacheErrorDomain = @"ESCache";
-static NSString * const kDefaultCacheName = @"0043-a8f9-c97d-6280-4348-5cb1-2e83-6b00";
 static const char * kCacheQueueName = "info.idevblog.cache";
 
 static inline NSString *URLEncodeString(NSString *string);
@@ -45,16 +44,6 @@ static inline NSString *URLEncodeString(NSString *string);
     dispatch_release(_queue);
     [super dealloc];
 #endif
-}
-
-+ (instancetype)sharedCache {
-    __strong static id sharedInstance = nil;
-
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        sharedInstance = [[self alloc] initWithName:kDefaultCacheName error:NULL];
-    });
-    return sharedInstance;
 }
 
 - (instancetype)initWithName:(NSString *)name error:(NSError *__autoreleasing *)e {

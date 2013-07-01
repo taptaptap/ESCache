@@ -46,12 +46,6 @@ extern NSString * ESCacheErrorDomain;
 @interface ESCache : NSObject
 
 /*
- @abstract Shared instance. It uses 'default' name.
- 
- @return Shared instance of ESCache.
- */
-+ (instancetype)sharedCache;
-/*
  @abstract Designated initializer. This method should be used instead of [ESCache init]
 
  @param name Used to name internal NSCache instance and to name a folder which is used to store cached values persistently.

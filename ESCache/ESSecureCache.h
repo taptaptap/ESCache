@@ -61,12 +61,6 @@ extern NSString * ESSecureCacheErrorDomain;
 @property (nonatomic, assign, readonly) ESSecureCacheType type;
 
 /*
- @abstract Shared instance. It uses 'default' name and file-backed persistence.
-
- @return Shared instance of ESSecureCache.
- */
-+ (instancetype)sharedCache;
-/*
  @abstract Designated initializer. This method should be used instead of [ESSecureCache init]
 
  @param name Used to name a file which is used to store cached values persistently or as a corresponding key in NSUserDefaults.
