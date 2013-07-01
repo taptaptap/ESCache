@@ -2,8 +2,8 @@
 
 ESCache is a simple NSCache/NSMutableDictionary (in secure version) wrapper which is backed by on-disk persistence. It has two useful classes: ESCache and ESSecureCache.
 
-[ESCache](http://github.com/sharpland/ESCache/ESCache/ESCache.h) class might be used when you need to persist NSCache'd data to share it between launch sessions.
-[ESSecureCache](http://github.com/sharpland/ESCache/ESCache/ESSecureCache.h) might be used to share data between sessions and it also encrypts persistent storage.
+[ESCache](http://github.com/0xc010d/ESCache/ESCache/ESCache.h) class might be used when you need to persist NSCache'd data to share it between launch sessions.
+[ESSecureCache](http://github.com/0xc010d/ESCache/ESCache/ESSecureCache.h) might be used to share data between sessions and it also encrypts persistent storage.
 
 ## Example usage
 
@@ -57,7 +57,7 @@ ESCache supports both ARC and non-ARC environment.
 
 ## Contact
 
-Drop [me](https://twitter.com/sharpland) a line if you have questions regarding to that library.
+Drop [me](https://twitter.com/0xc010d) a line if you have questions regarding to that library.
 
 ## License
 
