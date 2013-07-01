@@ -34,6 +34,7 @@ static inline NSString *URLEncodeString(NSString *string);
     NSString *_cachesPath;
     dispatch_queue_t _queue;
 }
+@synthesize inMemoryCache = _cache;
 
 - (void)dealloc {
     dispatch_barrier_sync(_queue, ^{}); //wait till the queue will finish all tasks
