@@ -159,6 +159,25 @@ static inline NSString *URLEncodeString(NSString *string);
     return object;
 }
 
+- (void)objectForKey:(NSString *)key withBlock:(void (^)(id object, BOOL fromMemory))block onQueue:(dispatch_queue_t)queue {
+    if (key != nil) {
+        dispatch_async(_queue, ^{
+            BOOL fromMemory = YES;
+            id object = [_cache objectForKey:key];
+            if (!object) {
+                fromMemory = NO;
+                object = [NSKeyedUnarchiver unarchiveObjectWithFile:[self desiredPathForObjectForKey:key]];
+                if (object != nil) {
+                    dispatch_barrier_async(_queue, ^{
+                        [_cache setObject:object forKey:key];
+                    });
+                }
+            }
+            dispatch_async(queue, ^{ block(object, fromMemory); });
+        });
+    }
+}
+
 - (void)removeObjectForKey:(NSString *)key {
     if (key != nil) {
         dispatch_barrier_async(_queue, ^{

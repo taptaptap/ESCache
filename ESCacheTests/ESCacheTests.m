@@ -47,6 +47,47 @@
     STAssertEqualObjects(object, originalObject, @"File cached object should be equal to one which was used before");
 }
 
+- (void)testAsyncObjectRetrieving {
+    NSString *originalObject = @"test string object";
+    [[ESCache sharedCache] setObject:originalObject forKey:@"key"];
+    
+    __block id object = nil;
+    __block BOOL inMemory = NO;
+    
+    [[ESCache sharedCache] objectForKey:@"key"
+                              withBlock:^(id retrievedObject, BOOL fromMemory) {
+                                  object = retrievedObject;
+                                  inMemory = fromMemory;
+                              } onQueue:dispatch_get_main_queue()];
+    
+    NSDate *timeoutDate = [NSDate dateWithTimeIntervalSinceNow:0.1];
+    while (1) {
+        [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate date]];
+        if ([timeoutDate timeIntervalSinceNow] < 0.0)
+            break;
+    }
+    
+    STAssertEqualObjects(object, originalObject, @"NSCache'd object should be equal to one which was used before");
+    STAssertTrue(inMemory, @"Retrieved object should be from in-memory cache");
+    
+    object = nil;
+    [[ESCache sharedCache] clearMemory];
+    [[ESCache sharedCache] objectForKey:@"key"
+                              withBlock:^(id retrievedObject, BOOL fromMemory) {
+                                  object = retrievedObject;
+                                  inMemory = fromMemory;                                  
+                              } onQueue:dispatch_get_main_queue()];
+    
+    timeoutDate = [NSDate dateWithTimeIntervalSinceNow:0.1];
+    while (1) {
+        [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate date]];
+        if ([timeoutDate timeIntervalSinceNow] < 0.0)
+            break;
+    }
+    STAssertEqualObjects(object, originalObject, @"NSCache'd object should be equal to one which was used before");
+    STAssertFalse(inMemory, @"Retrieved object should be from on-disk cache");
+}
+
 - (void)testObjectRemoving {
     NSString *object = @"test string object";
     [[ESCache sharedCache] setObject:object forKey:@"key"];

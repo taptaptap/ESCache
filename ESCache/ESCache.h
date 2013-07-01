@@ -44,6 +44,7 @@ typedef enum {
 extern NSString * ESCacheErrorDomain;
 
 @interface ESCache : NSObject
+@property (nonatomic, readonly) NSCache *inMemoryCache;
 
 /*
  @abstract Shared instance. It uses 'default' name.
@@ -89,6 +90,15 @@ extern NSString * ESCacheErrorDomain;
  @return An object or nil if the object is not in the cache
  */
 - (id)objectForKey:(NSString *)key;
+
+/*
+ @abstract Returns an object for the corresponding key using an async block.
+ 
+ @param key The key of the object.
+ @param block Block to execute with the accessed object.
+ @param queue the operation queue for the block.
+ */
+- (void)objectForKey:(NSString *)key withBlock:(void (^)(id object, BOOL fromMemory))block onQueue:(dispatch_queue_t)queue;
 /*
  @abstract Removes an object from the cache.
  
