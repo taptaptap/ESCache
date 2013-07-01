@@ -50,4 +50,12 @@
     STAssertNil(object, @"We shall not get an object if the password is wrong");
 }
 
+- (void)testSubscripting {
+    _cache[@"key"] = @"test string object";
+    [_cache clearMemory];
+    NSString *object = _cache[@"key"];
+
+    STAssertEqualObjects(object, @"test string object", @"Retrieved object should be the same as one we've just saved");
+}
+
 @end

@@ -96,4 +96,11 @@
     STAssertEqualObjects(object, @"test string object", @"We should properly get an objecvt from the filesystem");
 }
 
+- (void)testSubscripting {
+    NSString *object = @"test string object";
+    _cache[@"key"] = object;
+    [_cache clearMemory];
+    STAssertEqualObjects(_cache[@"key"], object, @"Retrieved object should be the same as one we've just saved");
+}
+
 @end

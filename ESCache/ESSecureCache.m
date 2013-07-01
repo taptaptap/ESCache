@@ -22,6 +22,7 @@
 
 #import <CommonCrypto/CommonCrypto.h>
 #import "ESSecureCache.h"
+#import <objc/runtime.h>
 
 NSString * ESSecureCacheErrorDomain = @"ESSecureCache";
 static const char * kCacheQueueName = "info.idevblog.secure-cache";
@@ -201,6 +202,19 @@ static inline CCCryptorStatus AES128Run(CCOperation operation, NSData *inData, N
     dispatch_barrier_async(_queue, ^{
         [_cache removeAllObjects];
     });
+}
+
+- (void)setObject:(id)obj forKeyedSubscript:(id <NSCopying>)key {
+    if ([object_getClass(key) conformsToProtocol:@protocol(NSCoding)]) {
+        [self setObject:obj forKey:(id <NSCopying, NSCoding>)key];
+    }
+    else {
+        NSAssert(NO, @"%@ should confirm to NSCoding protocol", key);
+    }
+}
+
+- (id)objectForKeyedSubscript:(id)key {
+    return [self objectForKey:key];
 }
 
 - (NSMutableDictionary *)cacheFromPersistentStore {

@@ -116,6 +116,10 @@ extern NSString * ESSecureCacheErrorDomain;
  */
 - (void)clearMemory;
 
+/* Subscripting support */
+- (void)setObject:(id)obj forKeyedSubscript:(id <NSCopying>)key;
+- (id)objectForKeyedSubscript:(id)key;
+
 /*
  @discussion NSObject's init is not available.
  */

@@ -98,6 +98,10 @@ extern NSString * ESCacheErrorDomain;
  */
 - (void)clearMemory;
 
+/* Subscripting support */
+- (void)setObject:(id)obj forKeyedSubscript:(NSString *)key;
+- (id)objectForKeyedSubscript:(NSString *)key;
+
 /*
  @abstract Returnes object's file path.
  

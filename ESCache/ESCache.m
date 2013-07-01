@@ -173,6 +173,14 @@ static inline NSString *URLEncodeString(NSString *string);
     });
 }
 
+- (void)setObject:(id)obj forKeyedSubscript:(NSString *)key {
+    [self setObject:obj forKey:key];
+}
+
+- (id)objectForKeyedSubscript:(NSString *)key {
+    return [self objectForKey:key];
+}
+
 - (NSString *)pathForObjectForKey:(NSString *)key {
     return [self objectExistsForKey:key] ? [self desiredPathForObjectForKey:key] : nil;
 }
