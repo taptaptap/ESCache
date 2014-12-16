@@ -213,12 +213,11 @@ static inline NSString *URLEncodeString(NSString *string);
 
 static inline NSString *URLEncodeString(NSString *string) {
 #if __has_feature(objc_arc)
-    return (__bridge_transfer NSString *)CFURLCreateStringByAddingPercentEscapes(NULL,
+    return (__bridge_transfer NSString *)CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault,
                                                                                  (__bridge CFStringRef)string,
                                                                                  NULL,
-                                                                                 (__bridge CFStringRef)@"!*'\"();:@&=+$,/?%#[]% ",
-                                                                                 kCFStringEncodingUTF8
-                                                                                 );
+                                                                                 (CFStringRef)@"!*'();:@&=+$,/?%#[]",
+                                                                                 kCFStringEncodingUTF8);
 #else
     return [(NSString *)CFURLCreateStringByAddingPercentEscapes(NULL,
                                                                 (CFStringRef)string,
