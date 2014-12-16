@@ -44,7 +44,7 @@
 		464341EC16AD977B0024EE7E /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		464341EF16AD977B0024EE7E /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		464341F016AD977B0024EE7E /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
-		464341FD16AD977B0024EE7E /* ESCacheDemoTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = ESCacheDemoTests.octest; path = ESCacheTests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
+		464341FD16AD977B0024EE7E /* ESCacheTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ESCacheTests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
 		464341FE16AD977B0024EE7E /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = Library/Frameworks/SenTestingKit.framework; sourceTree = DEVELOPER_DIR; };
 		4643420B16AD977B0024EE7E /* ESCacheTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ESCacheTests.m; sourceTree = "<group>"; };
 		4643421616AD97E80024EE7E /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
@@ -104,7 +104,7 @@
 			isa = PBXGroup;
 			children = (
 				464341DC16AD977B0024EE7E /* ESCacheDemo.app */,
-				464341FD16AD977B0024EE7E /* ESCacheDemoTests.octest */,
+				464341FD16AD977B0024EE7E /* ESCacheTests.octest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -200,7 +200,7 @@
 			);
 			name = ESCacheTests;
 			productName = ESCacheDemoTests;
-			productReference = 464341FD16AD977B0024EE7E /* ESCacheDemoTests.octest */;
+			productReference = 464341FD16AD977B0024EE7E /* ESCacheTests.octest */;
 			productType = "com.apple.product-type.bundle";
 		};
 /* End PBXNativeTarget section */

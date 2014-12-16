@@ -47,12 +47,6 @@ extern NSString * ESCacheErrorDomain;
 @property (nonatomic, readonly) NSCache *inMemoryCache;
 
 /*
- @abstract Shared instance. It uses 'default' name.
- 
- @return Shared instance of ESCache.
- */
-+ (instancetype)sharedCache;
-/*
  @abstract Designated initializer. This method should be used instead of [ESCache init]
 
  @param name Used to name internal NSCache instance and to name a folder which is used to store cached values persistently.
@@ -113,6 +107,10 @@ extern NSString * ESCacheErrorDomain;
  @abstract Removes all objects from in-memory cache.
  */
 - (void)clearMemory;
+
+/* Subscripting support */
+- (void)setObject:(id)obj forKeyedSubscript:(NSString *)key;
+- (id)objectForKeyedSubscript:(NSString *)key;
 
 /*
  @abstract Returnes object's file path.

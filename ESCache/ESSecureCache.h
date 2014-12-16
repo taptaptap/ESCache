@@ -61,12 +61,6 @@ extern NSString * ESSecureCacheErrorDomain;
 @property (nonatomic, assign, readonly) ESSecureCacheType type;
 
 /*
- @abstract Shared instance. It uses 'default' name and file-backed persistence.
-
- @return Shared instance of ESSecureCache.
- */
-+ (instancetype)sharedCache;
-/*
  @abstract Designated initializer. This method should be used instead of [ESSecureCache init]
 
  @param name Used to name a file which is used to store cached values persistently or as a corresponding key in NSUserDefaults.
@@ -121,6 +115,10 @@ extern NSString * ESSecureCacheErrorDomain;
  @abstract Removes all objects from in-memory cache.
  */
 - (void)clearMemory;
+
+/* Subscripting support */
+- (void)setObject:(id)obj forKeyedSubscript:(id <NSCopying>)key;
+- (id)objectForKeyedSubscript:(id)key;
 
 /*
  @discussion NSObject's init is not available.
