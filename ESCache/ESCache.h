@@ -106,6 +106,13 @@ extern NSString * ESCacheErrorDomain;
  */
 - (void)removeObjectForKey:(NSString *)key;
 /*
+ @abstract Removes an object from the memory cache and optionally from the disk cache.
+ 
+ @param key Object's key
+ @param removeFromDisk If YES will remove from disk too.
+ */
+- (void)removeObjectForKey:(NSString *)key fromDisk:(BOOL)removeFromDisk;
+/*
  @abstract Removes all objects from the cache and persistent store.
  */
 - (void)removeAllObjects;

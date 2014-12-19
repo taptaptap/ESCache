@@ -180,10 +180,16 @@ static inline NSString *URLEncodeString(NSString *string);
 }
 
 - (void)removeObjectForKey:(NSString *)key {
+    [self removeObjectForKey:key fromDisk:YES];
+}
+
+- (void)removeObjectForKey:(NSString *)key fromDisk:(BOOL)removeFromDisk{
     if (key != nil) {
         dispatch_barrier_async(_queue, ^{
             [_cache removeObjectForKey:key];
-            [_fileManager removeItemAtPath:[self desiredPathForObjectForKey:key] error:NULL];
+            if (removeFromDisk) {
+                [_fileManager removeItemAtPath:[self desiredPathForObjectForKey:key] error:NULL];
+            }
         });
     }
 }
