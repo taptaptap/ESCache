@@ -23,7 +23,6 @@
 #import "ESCache.h"
 
 NSString * ESCacheErrorDomain = @"ESCache";
-static NSString * const kDefaultCacheName = @"0043-a8f9-c97d-6280-4348-5cb1-2e83-6b00";
 static const char * kCacheQueueName = "info.idevblog.cache";
 
 static inline NSString *URLEncodeString(NSString *string);
@@ -46,16 +45,6 @@ static inline NSString *URLEncodeString(NSString *string);
     dispatch_release(_queue);
     [super dealloc];
 #endif
-}
-
-+ (instancetype)sharedCache {
-    __strong static id sharedInstance = nil;
-
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        sharedInstance = [[self alloc] initWithName:kDefaultCacheName error:NULL];
-    });
-    return sharedInstance;
 }
 
 - (instancetype)initWithName:(NSString *)name error:(NSError *__autoreleasing *)e {
@@ -210,6 +199,14 @@ static inline NSString *URLEncodeString(NSString *string);
     });
 }
 
+- (void)setObject:(id)obj forKeyedSubscript:(NSString *)key {
+    [self setObject:obj forKey:key];
+}
+
+- (id)objectForKeyedSubscript:(NSString *)key {
+    return [self objectForKey:key];
+}
+
 - (NSString *)pathForObjectForKey:(NSString *)key {
     return [self objectExistsForKey:key] ? [self desiredPathForObjectForKey:key] : nil;
 }
@@ -222,12 +219,11 @@ static inline NSString *URLEncodeString(NSString *string);
 
 static inline NSString *URLEncodeString(NSString *string) {
 #if __has_feature(objc_arc)
-    return (__bridge_transfer NSString *)CFURLCreateStringByAddingPercentEscapes(NULL,
+    return (__bridge_transfer NSString *)CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault,
                                                                                  (__bridge CFStringRef)string,
                                                                                  NULL,
-                                                                                 (__bridge CFStringRef)@"!*'\"();:@&=+$,/?%#[]% ",
-                                                                                 kCFStringEncodingUTF8
-                                                                                 );
+                                                                                 (CFStringRef)@"!*'();:@&=+$,/?%#[]",
+                                                                                 kCFStringEncodingUTF8);
 #else
     return [(NSString *)CFURLCreateStringByAddingPercentEscapes(NULL,
                                                                 (CFStringRef)string,

@@ -4,23 +4,26 @@
 @interface ESCacheTests : SenTestCase
 @end
 
-@implementation ESCacheTests
+@implementation ESCacheTests {
+    ESCache *_cache;
+}
 
 - (void)setUp {
     [super setUp];
+    _cache = [[ESCache alloc] initWithName:@"test name" error:NULL];
 }
 
 - (void)tearDown {
-    [[ESCache sharedCache] removeAllObjects];
+    [_cache removeAllObjects];
 
     [super tearDown];
 }
 
 - (void)testObjectAdding {
     NSString *object = @"test string object";
-    [[ESCache sharedCache] setObject:object forKey:@"key"];
-    BOOL objectExists = [[ESCache sharedCache] objectExistsForKey:@"key"];
-    NSString *objectFilePath = [[ESCache sharedCache] pathForObjectForKey:@"key"];
+    [_cache setObject:object forKey:@"key"];
+    BOOL objectExists = [_cache objectExistsForKey:@"key"];
+    NSString *objectFilePath = [_cache pathForObjectForKey:@"key"];
     BOOL objectFileExitst = [[NSFileManager defaultManager] fileExistsAtPath:objectFilePath];
 
     STAssertTrue(objectExists, @"An object should exist");
@@ -30,20 +33,20 @@
 
 - (void)testNilSetting {
     NSString *object = @"test string object";
-    [[ESCache sharedCache] setObject:object forKey:@"key"];
-    [[ESCache sharedCache] setObject:nil forKey:@"key"];
-    object = [[ESCache sharedCache] objectForKey:@"key"];
+    [_cache setObject:object forKey:@"key"];
+    [_cache setObject:nil forKey:@"key"];
+    object = [_cache objectForKey:@"key"];
     STAssertNil(object, @"Setting nil should remove object with corresponding key from the cache");
 }
 
 - (void)testObjectRetrieving {
     NSString *originalObject = @"test string object";
-    [[ESCache sharedCache] setObject:originalObject forKey:@"key"];
-    id object = [[ESCache sharedCache] objectForKey:@"key"];
+    [_cache setObject:originalObject forKey:@"key"];
+    id object = [_cache objectForKey:@"key"];
     STAssertEqualObjects(object, originalObject, @"NSCache'd object should be equal to one which was used before");
 
-    [[ESCache sharedCache] clearMemory];
-    object = [[ESCache sharedCache] objectForKey:@"key"];
+    [_cache clearMemory];
+    object = [_cache objectForKey:@"key"];
     STAssertEqualObjects(object, originalObject, @"File cached object should be equal to one which was used before");
 }
 
@@ -90,33 +93,33 @@
 
 - (void)testObjectRemoving {
     NSString *object = @"test string object";
-    [[ESCache sharedCache] setObject:object forKey:@"key"];
-    [[ESCache sharedCache] removeObjectForKey:@"key"];
-    STAssertNil([[ESCache sharedCache] objectForKey:@"key"], @"We shouldn't get just removed object");
+    [_cache setObject:object forKey:@"key"];
+    [_cache removeObjectForKey:@"key"];
+    STAssertNil([_cache objectForKey:@"key"], @"We shouldn't get just removed object");
 }
 
 - (void)testAllObjectsRemoving {
     NSString *firstObject = @"test string object";
-    [[ESCache sharedCache] setObject:firstObject forKey:@"key1"];
+    [_cache setObject:firstObject forKey:@"key1"];
     NSString *secondObject = @"test string object";
-    [[ESCache sharedCache] setObject:secondObject forKey:@"key2"];
-    [[ESCache sharedCache] removeAllObjects];
-    STAssertFalse([[ESCache sharedCache] objectExistsForKey:@"key1"], @"First object should not be in cache");
-    STAssertFalse([[ESCache sharedCache] objectExistsForKey:@"key2"], @"Second object should not be in cache");
+    [_cache setObject:secondObject forKey:@"key2"];
+    [_cache removeAllObjects];
+    STAssertFalse([_cache objectExistsForKey:@"key1"], @"First object should not be in cache");
+    STAssertFalse([_cache objectExistsForKey:@"key2"], @"Second object should not be in cache");
 }
 
 - (void)testESNSCodingException {
     NSObject *object = [[NSObject alloc] init];
-    STAssertNoThrow([[ESCache sharedCache] setObject:(id<NSCoding>)object forKey:@"key"], @"We shall not get an exception here");
+    STAssertNoThrow([_cache setObject:(id<NSCoding>)object forKey:@"key"], @"We shall not get an exception here");
 }
 
 - (void)testWierdKey {
     NSString *object = @"test string object";
     NSString *key = @"! @#$%^&*()_+=-§±`~/?.>,<";
-    [[ESCache sharedCache] setObject:object forKey:key];
-    object = [[ESCache sharedCache] objectForKey:key]; //this one is needed to wait for setObject:forKey: to be finished
-    [[ESCache sharedCache] clearMemory];
-    object = [[ESCache sharedCache] objectForKey:key];
+    [_cache setObject:object forKey:key];
+    object = [_cache objectForKey:key]; //this one is needed to wait for setObject:forKey: to be finished
+    [_cache clearMemory];
+    object = [_cache objectForKey:key];
     STAssertEqualObjects(object, @"test string object", @"We should get the object even for such a wierd key");
 }
 
@@ -132,6 +135,13 @@
     [cache clearMemory];
     object = [cache objectForKey:@"key"];
     STAssertEqualObjects(object, @"test string object", @"We should properly get an objecvt from the filesystem");
+}
+
+- (void)testSubscripting {
+    NSString *object = @"test string object";
+    _cache[@"key"] = object;
+    [_cache clearMemory];
+    STAssertEqualObjects(_cache[@"key"], object, @"Retrieved object should be the same as one we've just saved");
 }
 
 @end

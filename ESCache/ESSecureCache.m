@@ -22,9 +22,9 @@
 
 #import <CommonCrypto/CommonCrypto.h>
 #import "ESSecureCache.h"
+#import <objc/runtime.h>
 
 NSString * ESSecureCacheErrorDomain = @"ESSecureCache";
-static NSString * const kDefaultCacheName = @"f2e9-2863-3332-854c-f981-e7aa-e59c-12ef";
 static const char * kCacheQueueName = "info.idevblog.secure-cache";
 
 #pragma mark -
@@ -59,16 +59,6 @@ static inline CCCryptorStatus AES128Run(CCOperation operation, NSData *inData, N
 
     [super dealloc];
 #endif
-}
-
-+ (instancetype)sharedCache {
-    __strong static id sharedInstance = nil;
-
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        sharedInstance = [[self alloc] initWithName:kDefaultCacheName type:ESSecureCacheTypeFile error:NULL];
-    });
-    return sharedInstance;
 }
 
 - (void)setEncryptionKey:(NSData *)key {
@@ -212,6 +202,19 @@ static inline CCCryptorStatus AES128Run(CCOperation operation, NSData *inData, N
     dispatch_barrier_async(_queue, ^{
         [_cache removeAllObjects];
     });
+}
+
+- (void)setObject:(id)obj forKeyedSubscript:(id <NSCopying>)key {
+    if ([object_getClass(key) conformsToProtocol:@protocol(NSCoding)]) {
+        [self setObject:obj forKey:(id <NSCopying, NSCoding>)key];
+    }
+    else {
+        NSAssert(NO, @"%@ should confirm to NSCoding protocol", key);
+    }
+}
+
+- (id)objectForKeyedSubscript:(id)key {
+    return [self objectForKey:key];
 }
 
 - (NSMutableDictionary *)cacheFromPersistentStore {
