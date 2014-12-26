@@ -56,6 +56,8 @@ extern NSString * ESCacheErrorDomain;
  */
 - (instancetype)initWithName:(NSString *)name error:(NSError *__autoreleasing *)error;
 
+- (instancetype)initWithName:(NSString *)name inMemory:(BOOL)cacheInMemory inDisk:(BOOL)cacheInDisk error:(NSError *__autoreleasing *)error;
+
 /*
  @abstract Instance's name.
  */

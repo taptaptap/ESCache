@@ -32,6 +32,8 @@ static inline NSString *URLEncodeString(NSString *string);
     NSFileManager *_fileManager;
     NSString *_cachesPath;
     dispatch_queue_t _queue;
+    BOOL _inDisk;
+    BOOL _inMemory;
 }
 @synthesize inMemoryCache = _cache;
 
@@ -48,27 +50,36 @@ static inline NSString *URLEncodeString(NSString *string);
 }
 
 - (instancetype)initWithName:(NSString *)name error:(NSError *__autoreleasing *)e {
+    return [self initWithName:name inMemory:YES inDisk:YES error:e];
+}
+
+- (instancetype)initWithName:(NSString *)name inMemory:(BOOL)cacheInMemory inDisk:(BOOL)cacheInDisk error:(NSError *__autoreleasing *)e {
     self = [super init];
 
     __autoreleasing NSError *error = nil;
     if (self) {
         _queue = dispatch_queue_create(kCacheQueueName, DISPATCH_QUEUE_CONCURRENT);
         _fileManager = [[NSFileManager alloc] init];
-        _cache = [[NSCache alloc] init];
-
-        [_cache setName:name];
+        if (cacheInMemory) {
+            _inMemory = YES;
+            _cache = [[NSCache alloc] init];
+            [_cache setName:name];
+        }
 
         NSString *userCaches = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject];
         _cachesPath = [userCaches stringByAppendingPathComponent:URLEncodeString(name)];
 #if !__has_feature(objc_arc)
         [_cachesPath retain];
 #endif
-        BOOL isDirectory = NO;
-        if (![_fileManager fileExistsAtPath:_cachesPath isDirectory:&isDirectory]) {
-            [_fileManager createDirectoryAtPath:_cachesPath withIntermediateDirectories:YES attributes:nil error:&error];
-        }
-        else if (!isDirectory) {
-            error = [NSError errorWithDomain:ESCacheErrorDomain code:ESCacheErrorDirectoryIsFile userInfo:@{}];
+        if (cacheInDisk) {
+            _inDisk = YES;
+            BOOL isDirectory = NO;
+            if (![_fileManager fileExistsAtPath:_cachesPath isDirectory:&isDirectory]) {
+                [_fileManager createDirectoryAtPath:_cachesPath withIntermediateDirectories:YES attributes:nil error:&error];
+            }
+            else if (!isDirectory) {
+                error = [NSError errorWithDomain:ESCacheErrorDomain code:ESCacheErrorDirectoryIsFile userInfo:@{}];
+            }
         }
 
         if (error) {
@@ -97,8 +108,12 @@ static inline NSString *URLEncodeString(NSString *string);
         else {
             if ([(id)object conformsToProtocol:@protocol(NSCoding)]) {
                 dispatch_barrier_async(_queue, ^{
-                    [_cache setObject:object forKey:key];
-                    [NSKeyedArchiver archiveRootObject:object toFile:[self desiredPathForObjectForKey:key]];
+                    if (_inMemory) {
+                        [_cache setObject:object forKey:key];
+                    }
+                    if (_inDisk) {
+                        [NSKeyedArchiver archiveRootObject:object toFile:[self desiredPathForObjectForKey:key]];
+                    }
                 });
             }
         }
@@ -109,8 +124,10 @@ static inline NSString *URLEncodeString(NSString *string);
     __block BOOL objectExists = NO;
     if (key != nil) {
         dispatch_sync(_queue, ^{
-            objectExists = [_cache objectForKey:key] != nil;
-            if (!objectExists) {
+            if (_inMemory) {
+                objectExists = [_cache objectForKey:key] != nil;
+            }
+            if (!objectExists && _inDisk) {
                 objectExists = [_fileManager fileExistsAtPath:[self desiredPathForObjectForKey:key]];
             }
         });
@@ -122,11 +139,13 @@ static inline NSString *URLEncodeString(NSString *string);
     __block id object = nil;
     if (key != nil) {
         dispatch_sync(_queue, ^{
-            object = [_cache objectForKey:key];
+            if (_inMemory) {
+                object = [_cache objectForKey:key];
+            }
 #if !__has_feature(objc_arc)
             [object retain];
 #endif
-            if (!object) {
+            if (!object && _inDisk) {
                 object = [NSKeyedUnarchiver unarchiveObjectWithFile:[self desiredPathForObjectForKey:key]];
                 if (object != nil) {
 #if !__has_feature(objc_arc)
@@ -134,7 +153,9 @@ static inline NSString *URLEncodeString(NSString *string);
                     [object retain]; //this one is for autorelease in barrier's block
 #endif
                     dispatch_barrier_async(_queue, ^{
-                        [_cache setObject:object forKey:key];
+                        if (_inMemory) {
+                            [_cache setObject:object forKey:key];
+                        }
 #if !__has_feature(objc_arc)
                         [object release];
 #endif
@@ -153,13 +174,18 @@ static inline NSString *URLEncodeString(NSString *string);
     if (key != nil) {
         dispatch_async(_queue, ^{
             BOOL fromMemory = YES;
-            id object = [_cache objectForKey:key];
-            if (!object) {
+            id object = nil;
+            if (_inMemory) {
+                object = [_cache objectForKey:key];
+            }
+            if (!object && _inDisk) {
                 fromMemory = NO;
                 object = [NSKeyedUnarchiver unarchiveObjectWithFile:[self desiredPathForObjectForKey:key]];
                 if (object != nil) {
                     dispatch_barrier_async(_queue, ^{
-                        [_cache setObject:object forKey:key];
+                        if (_inMemory) {
+                            [_cache setObject:object forKey:key];
+                        }
                     });
                 }
             }
@@ -175,8 +201,10 @@ static inline NSString *URLEncodeString(NSString *string);
 - (void)removeObjectForKey:(NSString *)key fromDisk:(BOOL)removeFromDisk{
     if (key != nil) {
         dispatch_barrier_async(_queue, ^{
-            [_cache removeObjectForKey:key];
-            if (removeFromDisk) {
+            if (_inMemory) {
+                [_cache removeObjectForKey:key];
+            }
+            if (removeFromDisk && _inDisk) {
                 [_fileManager removeItemAtPath:[self desiredPathForObjectForKey:key] error:NULL];
             }
         });
@@ -185,18 +213,24 @@ static inline NSString *URLEncodeString(NSString *string);
 
 - (void)removeAllObjects {
     dispatch_barrier_async(_queue, ^{
-        [_cache removeAllObjects];
-        NSArray *files = [_fileManager contentsOfDirectoryAtPath:_cachesPath error:NULL];
-        for (NSString *file in files) {
-            [_fileManager removeItemAtPath:[_cachesPath stringByAppendingPathComponent:file] error:NULL];
+        if (_inMemory) {
+            [_cache removeAllObjects];
+        }
+        if (_inDisk) {
+            NSArray *files = [_fileManager contentsOfDirectoryAtPath:_cachesPath error:NULL];
+            for (NSString *file in files) {
+                [_fileManager removeItemAtPath:[_cachesPath stringByAppendingPathComponent:file] error:NULL];
+            }
         }
     });
 }
 
 - (void)clearMemory {
-    dispatch_barrier_async(_queue, ^{
-        [_cache removeAllObjects];
-    });
+    if (_inMemory) {
+        dispatch_barrier_async(_queue, ^{
+            [_cache removeAllObjects];
+        });
+    }
 }
 
 - (void)setObject:(id)obj forKeyedSubscript:(NSString *)key {
