@@ -24,6 +24,7 @@
 
 NSString * ESCacheErrorDomain = @"ESCache";
 static const char * kCacheQueueName = "info.idevblog.cache";
+static NSUInteger const PurgeFilesAge = 60 * 60 * 24 * 7; /* 1 week */
 
 static inline NSString *URLEncodeString(NSString *string);
 
@@ -79,6 +80,12 @@ static inline NSString *URLEncodeString(NSString *string);
             [self release];
 #endif
             self = nil;
+        }
+        else {
+            static dispatch_once_t onceToken;
+            dispatch_once(&onceToken, ^{
+                [self purge];
+            });
         }
     }
 
@@ -212,9 +219,36 @@ static inline NSString *URLEncodeString(NSString *string);
 }
 
 - (NSString *)desiredPathForObjectForKey:(NSString *)key {
-    return [_cachesPath stringByAppendingPathComponent:URLEncodeString(key)];
+    NSString *path = [_cachesPath stringByAppendingPathComponent:URLEncodeString(key)];
+    return path;
 }
 
+- (BOOL)fileAtPath:(NSString*)path isOlderThan:(CGFloat)seconds
+{
+    NSError *error = nil;
+    NSDictionary* properties = [_fileManager attributesOfItemAtPath:path error:&error];
+    NSDate *modificationDate = properties[NSFileModificationDate];
+    if (modificationDate) {
+        if ([[NSDate date] timeIntervalSinceDate:modificationDate] > seconds) {
+            return YES;
+        }
+    }
+    return NO;
+}
+
+- (void)purge
+{
+    NSDirectoryEnumerator *dirEnumerator = [_fileManager enumeratorAtURL:[NSURL fileURLWithPath:_cachesPath]
+                                              includingPropertiesForKeys:@[NSURLNameKey, NSURLIsDirectoryKey]
+                                                                 options:0
+                                                            errorHandler:nil];
+
+    for(NSURL *filepathURL in dirEnumerator) {
+        if ([self fileAtPath:[filepathURL path] isOlderThan:PurgeFilesAge]) {
+            [_fileManager removeItemAtURL:filepathURL error:nil];
+        }
+    }
+}
 @end
 
 static inline NSString *URLEncodeString(NSString *string) {
