@@ -253,11 +253,8 @@ static inline NSString *URLEncodeString(NSString *string);
 
 static inline NSString *URLEncodeString(NSString *string) {
 #if __has_feature(objc_arc)
-    return (__bridge_transfer NSString *)CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault,
-                                                                                 (__bridge CFStringRef)string,
-                                                                                 NULL,
-                                                                                 (CFStringRef)@"!*'();:@&=+$,/?%#[]",
-                                                                                 kCFStringEncodingUTF8);
+    NSCharacterSet *charSet = [NSCharacterSet characterSetWithCharactersInString:@"!*'();:@&=+$,/?%#[]"];
+    return [string stringByAddingPercentEncodingWithAllowedCharacters:charSet];
 #else
     return [(NSString *)CFURLCreateStringByAddingPercentEscapes(NULL,
                                                                 (CFStringRef)string,
